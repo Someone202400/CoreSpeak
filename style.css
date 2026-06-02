@@ -42,7 +42,7 @@ body {
 
 body.dyslexic-font,
 body.dyslexic-font * {
-    font-family: 'OpenDyslexic', 'OpenDyslexic-Regular', 'Lexie Readable', sans-serif !important;
+    font-family: 'OpenDyslexic', 'OpenDyslexic-Regular', 'OpenDyslexic3', sans-serif !important;
     line-height: 1.7 !important;
     word-spacing: 0.12em !important;
     letter-spacing: 0.04em !important;
@@ -100,7 +100,7 @@ body.dyslexic-font * {
 
 /* Landing Navbar */
 .landing-nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     background: rgba(255,255,255,0.85);
     backdrop-filter: var(--glass-blur);
     border-bottom: 1px solid rgba(226,232,240,0.5);
@@ -138,6 +138,36 @@ body.dyslexic-font * {
 }
 
 .nav-cta-link:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+/* ── Nav Settings Toggles ── */
+.nav-settings {
+    display: flex; align-items: center; gap: 0.5rem;
+}
+
+.nav-settings-btn {
+    padding: 0.55rem 1.15rem;
+    border-radius: 50px;
+    border: 1px solid var(--slate-border);
+    background: rgba(255,255,255,0.85);
+    font-weight: 600; font-size: 0.88rem;
+    cursor: pointer; color: var(--text-muted);
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+
+.nav-settings-btn:hover {
+    background: white;
+    border-color: #94a3b8;
+    color: var(--text-primary);
+}
+
+.nav-settings-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+}
 
 .nav-hamburger {
     display: none; flex-direction: column; gap: 5px;
@@ -189,7 +219,16 @@ body.dyslexic-font * {
 
 .hero-subtitle {
     font-size: 1.3rem; color: var(--text-muted);
-    max-width: 600px; line-height: 1.7; margin-bottom: 2rem;
+    max-width: 600px; line-height: 1.7; margin-bottom: 1rem;
+}
+
+.hero-cloud-save {
+    font-size: 0.95rem; color: var(--accent-blue);
+    font-weight: 600; margin-bottom: 2rem;
+    background: rgba(37,99,235,0.08);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    display: inline-block;
 }
 
 .hero-cta {
@@ -199,6 +238,7 @@ body.dyslexic-font * {
     background: var(--accent-blue);
     color: white; font-weight: 700; font-size: 1.1rem;
     text-decoration: none;
+    border: none; cursor: pointer; font-family: inherit;
     box-shadow: 0 8px 25px rgba(37,99,235,0.35);
     transition: all 0.3s;
 }
@@ -206,6 +246,10 @@ body.dyslexic-font * {
 .hero-cta:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 35px rgba(37,99,235,0.45);
+}
+
+.hero-cta:active {
+    transform: translateY(-1px);
 }
 
 /* Stats Bar */
@@ -382,7 +426,8 @@ body.dyslexic-font * {
    ═══════════════════════════════════════════ */
 
 .app-header {
-    position: sticky; top: 0; z-index: 100;
+    position: sticky; top: 64px; z-index: 100;
+    margin-top: 64px;
     background: rgba(255,255,255,0.88);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(226,232,240,0.6);
@@ -436,40 +481,6 @@ body.dyslexic-font * {
 }
 
 .btn-signout:hover { background: #f8fafc; color: var(--accent-red); border-color: #fecaca; }
-
-/* ═══════════════════════════════════════════
-   SETTINGS TRAY (Accessibility Toggles)
-   ═══════════════════════════════════════════ */
-
-.settings-tray {
-    display: flex; align-items: center; gap: 0.4rem;
-    margin: 0 0.75rem;
-}
-
-.settings-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1px solid var(--slate-border);
-    background: rgba(255,255,255,0.8);
-    cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
-    font-size: 1.05rem; font-weight: 700;
-    transition: all 0.2s;
-    color: var(--text-muted);
-    padding: 0; line-height: 1;
-    flex-shrink: 0;
-}
-
-.settings-btn:hover {
-    background: white;
-    border-color: #94a3b8;
-    transform: translateY(-1px);
-}
-
-.settings-btn.active {
-    background: var(--accent-blue);
-    color: white;
-    border-color: var(--accent-blue);
-}
 
 /* ═══════════════════════════════════════════
    WORKSPACE (Speak Page) — Premium Redesign
@@ -537,14 +548,14 @@ body.dyslexic-font * {
 }
 
 .sentence-controls {
-    display: flex; gap: 0.875rem; flex-wrap: wrap;
+    display: flex; gap: 1rem; flex-wrap: wrap;
 }
 
 .ctrl-btn {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 14px;
-    border: none; font-weight: 700; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: none; font-weight: 700; font-size: 1rem;
     cursor: pointer; transition: all 0.2s; color: white;
     letter-spacing: -0.01em;
 }
@@ -837,6 +848,9 @@ body.dyslexic-font * {
    ═══════════════════════════════════════════ */
 
 body.dark-mode {
+    --text-primary: #f1f5f9;
+    --text-muted: #94a3b8;
+    --slate-border: #334155;
     background: #0f172a;
 }
 
@@ -847,6 +861,32 @@ body.dark-mode .bg-ambient {
         radial-gradient(ellipse 50% 40% at 50% 50%, rgba(5,150,105,0.08) 0%, transparent 60%),
         radial-gradient(ellipse 80% 60% at 70% 30%, rgba(219,39,119,0.06) 0%, transparent 60%),
         linear-gradient(135deg, #0f172a, #1e293b) !important;
+}
+
+body.dark-mode .landing-nav {
+    background: rgba(15,23,42,0.92);
+    border-bottom-color: rgba(51,65,85,0.6);
+}
+
+body.dark-mode .nav-link {
+    color: #cbd5e1;
+}
+
+body.dark-mode .nav-link:hover {
+    color: #60a5fa;
+}
+
+body.dark-mode .nav-cta-link {
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+    color: white !important;
+}
+
+body.dark-mode .nav-brand {
+    color: #f1f5f9;
+}
+
+body.dark-mode .nav-brand span {
+    color: #60a5fa;
 }
 
 body.dark-mode .app-header {
@@ -872,22 +912,28 @@ body.dark-mode .btn-signout:hover {
     border-color: #7f1d1d;
 }
 
-body.dark-mode .settings-btn {
+body.dark-mode .nav-settings-btn {
     background: #1e293b;
     border-color: #334155;
     color: #94a3b8;
 }
 
-body.dark-mode .settings-btn:hover {
+body.dark-mode .nav-settings-btn:hover {
     background: #334155;
     color: #e2e8f0;
     border-color: #475569;
 }
 
-body.dark-mode .settings-btn.active {
+body.dark-mode .nav-settings-btn.active {
     background: var(--accent-blue);
     color: white;
     border-color: var(--accent-blue);
+}
+
+body.dark-mode .nav-links.open,
+body.dark-mode .nav-settings {
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.dark-mode .sentence-strip {
@@ -976,16 +1022,17 @@ body.dark-mode .sidebar-placeholder {
 
 body.dark-mode .sidebar-guest-cta {
     border-bottom-color: #334155;
+    background: linear-gradient(135deg, #451a03, #78350f, #451a03);
 }
 
 body.dark-mode .cta-text {
-    color: #fbbf24;
+    color: #fde68a;
 }
 
 body.dark-mode .btn-google-sidebar {
     background: #1e293b;
-    border-color: #475569;
-    color: #fbbf24;
+    border-color: #78350f;
+    color: #fde68a;
 }
 
 body.dark-mode .btn-google-sidebar:hover {
@@ -995,6 +1042,125 @@ body.dark-mode .btn-google-sidebar:hover {
 
 body.dark-mode .word-token {
     border-color: rgba(255,255,255,0.08);
+}
+
+/* ── Dark Mode: Brighter Tool Page Buttons ── */
+
+body.dark-mode .category-btn {
+    color: #cbd5e1;
+    border-color: #475569;
+}
+
+body.dark-mode .category-btn:hover {
+    color: #f1f5f9;
+    border-color: #60a5fa;
+}
+
+body.dark-mode .ctrl-btn {
+    filter: brightness(1.1);
+}
+
+body.dark-mode .ctrl-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* ── Dark Mode: Vocab Tile Tints ── */
+body.dark-mode .tile-common    { background: rgba(91,33,182,0.25); color: #c4b5fd; }
+body.dark-mode .tile-people    { background: rgba(146,64,14,0.25); color: #fcd34d; }
+body.dark-mode .tile-actions   { background: rgba(6,95,70,0.25); color: #6ee7b7; }
+body.dark-mode .tile-describe  { background: rgba(30,64,175,0.25); color: #93c5fd; }
+body.dark-mode .tile-places    { background: rgba(131,24,67,0.25); color: #f9a8d4; }
+body.dark-mode .tile-things    { background: rgba(55,48,163,0.25); color: #a5b4fc; }
+body.dark-mode .tile-feelings  { background: rgba(17,94,89,0.25); color: #5eead4; }
+body.dark-mode .tile-food      { background: rgba(154,52,18,0.25); color: #fdba74; }
+body.dark-mode .tile-questions { background: rgba(55,48,163,0.25); color: #a5b4fc; }
+body.dark-mode .tile-time      { background: rgba(21,94,117,0.25); color: #67e8f9; }
+body.dark-mode .tile-weather   { background: rgba(30,64,175,0.25); color: #93c5fd; }
+body.dark-mode .tile-emergency {
+    background: rgba(153,27,27,0.35) !important;
+    color: #fca5a5 !important;
+}
+
+/* ── Dark Mode: Landing Page Text ── */
+
+body.dark-mode .hero-badge {
+    background: rgba(37,99,235,0.2);
+}
+
+body.dark-mode .hero-cloud-save {
+    background: rgba(37,99,235,0.2);
+}
+
+body.dark-mode .section-title {
+    color: #f1f5f9;
+}
+
+body.dark-mode .feature-card {
+    background: rgba(30,41,59,0.85);
+    border-color: rgba(51,65,85,0.4);
+}
+
+body.dark-mode .feature-card h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-card {
+    background: rgba(30,41,59,0.85);
+    border-color: rgba(51,65,85,0.4);
+}
+
+body.dark-mode .step-card h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-number {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+body.dark-mode .step-arrow {
+    color: #3b82f6;
+}
+
+body.dark-mode .auth-card-landing {
+    background: rgba(30,41,59,0.85);
+    border-color: rgba(51,65,85,0.4);
+}
+
+body.dark-mode .btn-google-landing {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .btn-google-landing:hover {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-mode .landing-footer {
+    border-top-color: #334155;
+    color: #64748b;
+}
+
+body.dark-mode .hero-stats {
+    background: rgba(30,41,59,0.7);
+    border-color: rgba(51,65,85,0.4);
+}
+
+body.dark-mode .stat-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .hero-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .auth-description {
+    color: #94a3b8;
+}
+
+body.dark-mode .section-label {
+    background: rgba(37,99,235,0.2);
 }
 
 /* ═══════════════════════════════════════════
@@ -1013,13 +1179,20 @@ body.dark-mode .word-token {
     .landing-nav { padding: 0 1rem; }
     .nav-links { display: none; }
     .nav-hamburger { display: flex; }
+    .nav-inner { flex-wrap: wrap; height: auto; }
+
     .nav-links.open {
         display: flex; flex-direction: column;
-        position: absolute; top: 64px; left: 0; right: 0;
-        background: white; padding: 1rem 2rem;
-        border-bottom: 1px solid var(--slate-border);
+        order: 1; width: 100%;
+        background: white;
+        padding: 1rem 2rem 0.5rem;
+        border-top: 1px solid var(--slate-border);
         gap: 1rem;
     }
+
+    .nav-settings { display: none; order: 2; width: 100%; background: white; padding: 0 2rem 1rem; gap: 0.5rem; border-bottom: 1px solid var(--slate-border); }
+
+    .nav-settings.open { display: flex; }
     .hero-title { font-size: 3.2rem; }
     .hero-subtitle { font-size: 1.1rem; }
     .hero-stats { padding: 1.5rem; gap: 1.5rem; }
@@ -1030,8 +1203,10 @@ body.dark-mode .word-token {
     .app-header { padding: 0 1.25rem; }
     .header-inner { height: 60px; }
     .workspace { margin: 1.25rem auto; padding: 0 1.25rem; }
-    .settings-tray { gap: 0.3rem; margin: 0 0.5rem; }
-    .settings-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+    .nav-settings { gap: 0.35rem; }
+    .nav-settings-btn { padding: 0.45rem 0.85rem; font-size: 0.8rem; }
+    .ctrl-btn { padding: 0.85rem 1.25rem; font-size: 0.88rem; gap: 0.4rem; }
+    .sentence-controls { gap: 0.75rem; }
     .digital-clock { display: none; }
     .history-sidebar { width: 100%; right: -100%; }
     .sentence-strip { padding: 1.25rem 1.25rem; min-height: 76px; }
@@ -1058,7 +1233,9 @@ body.dark-mode .word-token {
     .workspace { margin: 1rem auto; padding: 0 1rem; }
     .app-header { padding: 0 1rem; }
     .header-inner { height: 56px; }
-    .settings-tray { margin: 0 0.25rem; gap: 0.25rem; }
-    .settings-btn { width: 30px; height: 30px; font-size: 0.85rem; }
+    .nav-settings { gap: 0.25rem; }
+    .nav-settings-btn { padding: 0.4rem 0.7rem; font-size: 0.76rem; }
+    .ctrl-btn { padding: 0.7rem 1rem; font-size: 0.82rem; gap: 0.35rem; }
+    .sentence-controls { gap: 0.6rem; }
     .alarm-btn { font-size: 1.1rem !important; padding: 1.25rem !important; }
 }
