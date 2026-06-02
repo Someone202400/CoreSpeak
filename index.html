@@ -22,13 +22,18 @@
     <div class="bg-ambient"></div>
 
     <!-- Landing Navbar -->
-    <nav class="landing-nav" id="landing-nav">
+    <nav class="landing-nav" id="landing-nav"> 
         <div class="nav-inner">
-            <a href="#" class="nav-brand">Core<span>Speak</span></a>
+            <a href="#" class="nav-brand" id="nav-brand-link">Core<span>Speak</span></a>
             <div class="nav-links">
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#how-it-works" class="nav-link">How It Works</a>
-                <a href="#auth-section" class="nav-link nav-cta-link">Get Started</a>
+                <a href="#" class="nav-link nav-cta-link" id="nav-get-started">Start Speaking</a>
+                <a href="#auth-section" class="nav-link">Sign In / Sign Up</a>
+            </div>
+            <div class="nav-settings" id="nav-settings">
+                <button id="dark-toggle" class="nav-settings-btn" title="Switch between light and dark mode">🌙 Dark Mode</button>
+                <button id="font-toggle" class="nav-settings-btn" title="Switch to OpenDyslexic font">📖 Dyslexic Font</button>
             </div>
             <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
@@ -40,10 +45,6 @@
     <header class="app-header" id="app-header" style="display:none;">
         <div class="header-inner">
             <h1 class="brand">Core<span>Speak</span></h1>
-            <div class="settings-tray">
-                <button id="dark-toggle" class="settings-btn" aria-label="Toggle dark mode">🌙</button>
-                <button id="font-toggle" class="settings-btn" aria-label="Toggle dyslexic font">Aa</button>
-            </div>
             <div class="header-right">
                 <div id="digital-clock" class="digital-clock">12:00:00</div>
                 <div id="profile-avatar" class="profile-avatar" style="display:none;">
@@ -62,7 +63,8 @@
             <div class="hero-badge">✨ AAC Communication Tool</div>
             <h1 class="hero-title">Core<span>Speak</span></h1>
             <p class="hero-subtitle">Give a voice to those who need it most.<br>Colorful, tactile, and intelligently designed.</p>
-            <a href="#auth-section" class="hero-cta">Get Started Free</a>
+            <p class="hero-cloud-save">Sign in with Google to save your phrases on any device. ☁️</p>
+            <button id="guest-start-btn" class="hero-cta">Start Speaking Free</button>
             <div class="hero-stats">
                 <div class="stat-item">
                     <span class="stat-number">245+</span>
@@ -151,11 +153,11 @@
         <section id="auth-section" class="section auth-section-landing">
             <div class="section-label">Get Started</div>
             <h2 class="section-title">Sign In to <span>CoreSpeak</span></h2>
-            <p class="auth-description">Sign in with Google to enable cloud sync. No account? One will be created automatically.</p>
+            <p class="auth-description">Sign in with Google to save your spoken history to the cloud.<br>No account needed — one will be created automatically.</p>
             <div class="auth-card-landing">
                 <button id="google-signin-btn" class="btn-google-landing">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
-                    Sign In with Google
+                    Sign In to Save Your History
                 </button>
                 <div id="auth-error" class="auth-error-msg"></div>
                 <p class="auth-note">🔒 Secure • Free • No credit card required</p>
@@ -205,7 +207,7 @@
             <button id="sidebar-close-btn" class="sidebar-close">&times;</button>
         </div>
         <div id="sidebar-guest-cta" class="sidebar-guest-cta">
-            <p class="cta-text">If you want to save your phrases, you can sign in.</p>
+            <p class="cta-text">If you want to save your phrases on any device, sign in.</p>
             <button id="sidebar-signin-btn" class="btn-google-sidebar">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
                 Sign In with Google
