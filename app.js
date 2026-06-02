@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, arrayUnion } from "firebase/firestore";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAkAe9k628QMEdzwG0kHfwprimbs203MgQ",
@@ -16,6 +17,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+
+// ── App Check: blocks unauthorized origins from using your Firebase config ──
+// Step 1: Get a free reCAPTCHA v3 site key: https://www.google.com/recaptcha/admin
+// Step 2: Register it in Firebase Console: Project > App Check > Register > reCAPTCHA v3
+// Step 3: Paste the site key below (the one from Firebase Console, not Google's admin page)
+// Without App Check, your API key works from any domain — this locks it to YOUR domain only.
+if (typeof self !== "undefined") {
+    try {
+        initializeAppCheck(app, {
+            provider: new ReCaptchaV3Provider("REPLACE_WITH_YOUR_APP_CHECK_SITE_KEY"),
+            isTokenAutoRefreshEnabled: true
+        });
+    } catch (e) {
+        console.warn("App Check not configured — add a reCAPTCHA site key to secure your API key.");
+    }
+}
 
 let currentSentence = [];
 let currentUser = null;
@@ -57,6 +74,15 @@ const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
 const sidebarOverlay = document.getElementById('sidebar-overlay');
 const sidebarList = document.getElementById('sidebar-list');
 const authErrorEl = document.getElementById('auth-error');
+const darkToggle = document.getElementById('dark-toggle');
+const fontToggle = document.getElementById('font-toggle');
+const sidebarSignInBtn = document.getElementById('sidebar-signin-btn');
+const sidebarGuestCta = document.getElementById('sidebar-guest-cta');
+const dyslexicFontLink = document.getElementById('dyslexic-font-link');
+
+const DYSLEXIC_CSS_URL = 'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.css';
+const DEBOUNCE_MS = 400;
+let lastClickTime = 0;
 
 // ── Landing Page Nav ──
 const landingNav = document.querySelector('.landing-nav');
@@ -223,6 +249,9 @@ function toggleEmergencyAlarm() {
 
 // ── Sentence ──
 function handleWordClick(word) {
+    const now = Date.now();
+    if (now - lastClickTime < DEBOUNCE_MS) return;
+    lastClickTime = now;
     currentSentence.push(word);
     speak(word);
     renderSentence();
@@ -260,13 +289,16 @@ async function handleSpeakPhrase() {
     if (currentSentence.length === 0) return;
     const phrase = currentSentence.join(' ');
     speak(phrase);
+    const entry = { text: phrase, timestamp: new Date().toISOString() };
     if (currentUser) {
         try {
             await setDoc(doc(db, "user_logs", currentUser.uid), {
-                history: arrayUnion({ text: phrase, timestamp: new Date().toISOString() }),
+                history: arrayUnion(entry),
                 lastUpdated: new Date().toISOString()
             }, { merge: true });
         } catch (e) { console.error("Log error:", e); }
+    } else {
+        addLocalHistory(entry);
     }
 }
 
@@ -290,35 +322,43 @@ function closeSidebar() {
     if (sidebarOverlay) sidebarOverlay.classList.remove('visible');
 }
 
+function renderHistoryList(history) {
+    if (!sidebarList) return;
+    if (!history || history.length === 0) {
+        sidebarList.innerHTML = '<p class="sidebar-placeholder">No saved phrases yet. Tap "Speak Phrase" to save one!</p>';
+        return;
+    }
+    history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    sidebarList.innerHTML = '';
+    history.forEach(entry => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.innerHTML = `
+            <span class="sidebar-item-text">${escHtml(entry.text)}</span>
+            <span class="sidebar-item-date">${relTime(entry.timestamp)}</span>
+            <button class="sidebar-replay" data-phrase="${escHtml(entry.text)}">▶</button>
+        `;
+        item.querySelector('.sidebar-replay').addEventListener('click', (e) => {
+            e.stopPropagation();
+            speak(entry.text);
+        });
+        sidebarList.appendChild(item);
+    });
+}
+
 async function renderSidebar() {
     if (!sidebarList) return;
     if (!currentUser) {
-        sidebarList.innerHTML = '<p class="sidebar-placeholder">Sign in to see saved phrases.</p>';
+        renderHistoryList(getLocalHistory());
         return;
     }
     try {
         const snap = await getDoc(doc(db, "user_logs", currentUser.uid));
-        if (!snap.exists() || !snap.data().history || snap.data().history.length === 0) {
-            sidebarList.innerHTML = '<p class="sidebar-placeholder">No saved phrases yet. Tap "Speak Phrase" to save one!</p>';
+        if (!snap.exists() || !snap.data().history) {
+            renderHistoryList([]);
             return;
         }
-        const history = snap.data().history;
-        history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        sidebarList.innerHTML = '';
-        history.forEach(entry => {
-            const item = document.createElement('div');
-            item.className = 'sidebar-item';
-            item.innerHTML = `
-                <span class="sidebar-item-text">${escHtml(entry.text)}</span>
-                <span class="sidebar-item-date">${relTime(entry.timestamp)}</span>
-                <button class="sidebar-replay" data-phrase="${escHtml(entry.text)}">▶</button>
-            `;
-            item.querySelector('.sidebar-replay').addEventListener('click', (e) => {
-                e.stopPropagation();
-                speak(entry.text);
-            });
-            sidebarList.appendChild(item);
-        });
+        renderHistoryList(snap.data().history);
     } catch (e) {
         sidebarList.innerHTML = '<p class="sidebar-placeholder">Error loading history.</p>';
     }
@@ -342,6 +382,73 @@ function relTime(iso) {
     return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+// ── Local Storage History (Guest Mode) ──
+function getLocalHistory() {
+    try { return JSON.parse(localStorage.getItem('corespeak_history') || '[]'); }
+    catch { return []; }
+}
+
+function addLocalHistory(entry) {
+    const history = getLocalHistory();
+    history.unshift(entry);
+    localStorage.setItem('corespeak_history', JSON.stringify(history.slice(0, 200)));
+}
+
+function clearLocalHistory() {
+    localStorage.removeItem('corespeak_history');
+}
+
+// ── Data Migration: localStorage → Firestore ──
+async function migrateLocalToCloud() {
+    const localHistory = getLocalHistory();
+    if (localHistory.length === 0) return;
+    try {
+        for (const entry of localHistory) {
+            await setDoc(doc(db, "user_logs", currentUser.uid), {
+                history: arrayUnion(entry),
+                lastUpdated: new Date().toISOString()
+            }, { merge: true });
+        }
+        clearLocalHistory();
+    } catch (e) {
+        console.error("Migration error:", e);
+    }
+}
+
+// ── Accessibility Toggles ──
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('corespeak_dark', isDark ? '1' : '0');
+    if (darkToggle) darkToggle.textContent = isDark ? '☀️' : '🌙';
+}
+
+function toggleDyslexicFont() {
+    const isOn = document.body.classList.toggle('dyslexic-font');
+    localStorage.setItem('corespeak_dyslexic', isOn ? '1' : '0');
+    if (fontToggle) fontToggle.classList.toggle('active', isOn);
+    if (dyslexicFontLink) dyslexicFontLink.href = isOn ? DYSLEXIC_CSS_URL : '';
+}
+
+function loadToggleStates() {
+    if (localStorage.getItem('corespeak_dark') === '1') {
+        document.body.classList.add('dark-mode');
+        if (darkToggle) darkToggle.textContent = '☀️';
+    }
+    if (localStorage.getItem('corespeak_dyslexic') === '1') {
+        document.body.classList.add('dyslexic-font');
+        if (fontToggle) fontToggle.classList.add('active');
+        if (dyslexicFontLink) dyslexicFontLink.href = DYSLEXIC_CSS_URL;
+    }
+}
+
+function showGuestCTA() {
+    if (sidebarGuestCta) sidebarGuestCta.classList.remove('hidden');
+}
+
+function hideGuestCTA() {
+    if (sidebarGuestCta) sidebarGuestCta.classList.add('hidden');
+}
+
 // ── Init ──
 function init() {
     renderCategories();
@@ -357,22 +464,30 @@ function attachEvents() {
     if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
     if (googleSignInBtn) googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+    if (sidebarSignInBtn) sidebarSignInBtn.addEventListener('click', handleGoogleSignIn);
     if (signOutBtn) signOutBtn.addEventListener('click', async () => { await signOut(auth); closeSidebar(); });
+    if (darkToggle) darkToggle.addEventListener('click', toggleDarkMode);
+    if (fontToggle) fontToggle.addEventListener('click', toggleDyslexicFont);
 
     onAuthStateChanged(auth, (user) => {
+        const wasGuest = currentUser === null && user !== null;
         currentUser = user;
+        if (appHeader) appHeader.style.display = 'block';
+        if (landingNav) landingNav.style.display = 'none';
+        startClock();
         if (user) {
-            if (appHeader) appHeader.style.display = 'block';
             updateProfile(user);
-            showView('speak-page');
-            startClock();
+            if (wasGuest) migrateLocalToCloud();
+            hideGuestCTA();
         } else {
-            if (appHeader) appHeader.style.display = 'none';
             updateProfile(null);
-            showView('home-page');
-            stopClock();
+            showGuestCTA();
         }
+        showView('speak-page');
     });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    loadToggleStates();
+    init();
+});
