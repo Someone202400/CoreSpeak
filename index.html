@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoreSpeak | AAC Communication Tool</title>
     <link rel="stylesheet" href="style.css">
+    <link id="dyslexic-font-link" rel="stylesheet" href="">
     <script type="importmap">
     {
       "imports": {
         "firebase/app": "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js",
         "firebase/auth": "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js",
+        "firebase/app-check": "https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check.js"
       }
     }
     </script>
@@ -38,6 +40,10 @@
     <header class="app-header" id="app-header" style="display:none;">
         <div class="header-inner">
             <h1 class="brand">Core<span>Speak</span></h1>
+            <div class="settings-tray">
+                <button id="dark-toggle" class="settings-btn" aria-label="Toggle dark mode">🌙</button>
+                <button id="font-toggle" class="settings-btn" aria-label="Toggle dyslexic font">Aa</button>
+            </div>
             <div class="header-right">
                 <div id="digital-clock" class="digital-clock">12:00:00</div>
                 <div id="profile-avatar" class="profile-avatar" style="display:none;">
@@ -198,8 +204,15 @@
             <h2>Saved Phrases</h2>
             <button id="sidebar-close-btn" class="sidebar-close">&times;</button>
         </div>
+        <div id="sidebar-guest-cta" class="sidebar-guest-cta">
+            <p class="cta-text">If you want to save your phrases, you can sign in.</p>
+            <button id="sidebar-signin-btn" class="btn-google-sidebar">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+                Sign In with Google
+            </button>
+        </div>
         <div id="sidebar-list" class="sidebar-list">
-            <p class="sidebar-placeholder">Sign in to see your saved phrases.</p>
+            <p class="sidebar-placeholder">Your phrases will appear here.</p>
         </div>
     </aside>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
