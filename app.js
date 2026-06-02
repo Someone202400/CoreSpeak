@@ -26,7 +26,7 @@ const provider = new GoogleAuthProvider();
 if (typeof self !== "undefined") {
     try {
         initializeAppCheck(app, {
-            provider: new ReCaptchaV3Provider("REPLACE_WITH_YOUR_APP_CHECK_SITE_KEY"),
+            provider: new ReCaptchaV3Provider("6LdDcgktAAAAADCNZJNTPMeC5W06Y2tO1VsnlKnV"),
             isTokenAutoRefreshEnabled: true
         });
     } catch (e) {
@@ -79,8 +79,11 @@ const fontToggle = document.getElementById('font-toggle');
 const sidebarSignInBtn = document.getElementById('sidebar-signin-btn');
 const sidebarGuestCta = document.getElementById('sidebar-guest-cta');
 const dyslexicFontLink = document.getElementById('dyslexic-font-link');
+const guestStartBtn = document.getElementById('guest-start-btn');
+const navGetStarted = document.getElementById('nav-get-started');
+const navBrandLink = document.getElementById('nav-brand-link');
 
-const DYSLEXIC_CSS_URL = 'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.css';
+const DYSLEXIC_CSS_URL = 'https://fonts.cdnfonts.com/css/opendyslexic';
 const DEBOUNCE_MS = 400;
 let lastClickTime = 0;
 
@@ -88,10 +91,12 @@ let lastClickTime = 0;
 const landingNav = document.querySelector('.landing-nav');
 const hamburger = document.getElementById('nav-hamburger');
 const navLinks = document.querySelector('.nav-links');
+const navSettings = document.querySelector('.nav-settings');
 
 if (hamburger) {
     hamburger.addEventListener('click', () => {
         navLinks.classList.toggle('open');
+        if (navSettings) navSettings.classList.toggle('open');
     });
 }
 
@@ -116,7 +121,7 @@ async function handleGoogleSignIn(e) {
     try {
         await signInWithPopup(auth, provider);
     } catch (error) {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt=""> Sign In with Google'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt=""> Sign In to Save Your History'; }
 
         switch (error.code) {
             case 'auth/popup-blocked':
@@ -161,6 +166,22 @@ function showView(id) {
     document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) el.classList.add('active');
+    updateNavForPage(id);
+}
+
+function updateNavForPage(pageId) {
+    if (!navGetStarted) return;
+    const isHome = pageId === 'home-page';
+    navGetStarted.textContent = isHome ? 'Start Speaking' : '← Back to Home';
+    navGetStarted.onclick = isHome
+        ? (e) => { e.preventDefault(); enterGuestMode(); }
+        : (e) => {
+            e.preventDefault();
+            if (appHeader) appHeader.style.display = 'none';
+            showView('home-page');
+            stopClock();
+            showGuestCTA();
+        };
 }
 
 // ── Profile ──
@@ -419,24 +440,30 @@ async function migrateLocalToCloud() {
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('corespeak_dark', isDark ? '1' : '0');
-    if (darkToggle) darkToggle.textContent = isDark ? '☀️' : '🌙';
+    if (darkToggle) darkToggle.innerHTML = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
 function toggleDyslexicFont() {
     const isOn = document.body.classList.toggle('dyslexic-font');
     localStorage.setItem('corespeak_dyslexic', isOn ? '1' : '0');
-    if (fontToggle) fontToggle.classList.toggle('active', isOn);
+    if (fontToggle) {
+        fontToggle.classList.toggle('active', isOn);
+        fontToggle.innerHTML = isOn ? '✅ Dyslexic Font' : '📖 Dyslexic Font';
+    }
     if (dyslexicFontLink) dyslexicFontLink.href = isOn ? DYSLEXIC_CSS_URL : '';
 }
 
 function loadToggleStates() {
     if (localStorage.getItem('corespeak_dark') === '1') {
         document.body.classList.add('dark-mode');
-        if (darkToggle) darkToggle.textContent = '☀️';
+        if (darkToggle) darkToggle.innerHTML = '☀️ Light Mode';
     }
     if (localStorage.getItem('corespeak_dyslexic') === '1') {
         document.body.classList.add('dyslexic-font');
-        if (fontToggle) fontToggle.classList.add('active');
+        if (fontToggle) {
+            fontToggle.classList.add('active');
+            fontToggle.innerHTML = '✅ Dyslexic Font';
+        }
         if (dyslexicFontLink) dyslexicFontLink.href = DYSLEXIC_CSS_URL;
     }
 }
@@ -449,8 +476,17 @@ function hideGuestCTA() {
     if (sidebarGuestCta) sidebarGuestCta.classList.add('hidden');
 }
 
+// ── Guest Mode (no auth) ──
+function enterGuestMode() {
+    if (appHeader) appHeader.style.display = 'block';
+    showView('speak-page');
+    startClock();
+    showGuestCTA();
+}
+
 // ── Init ──
 function init() {
+    updateNavForPage('home-page');
     renderCategories();
     renderGrid(currentCategory);
     attachEvents();
@@ -468,22 +504,35 @@ function attachEvents() {
     if (signOutBtn) signOutBtn.addEventListener('click', async () => { await signOut(auth); closeSidebar(); });
     if (darkToggle) darkToggle.addEventListener('click', toggleDarkMode);
     if (fontToggle) fontToggle.addEventListener('click', toggleDyslexicFont);
+    if (guestStartBtn) guestStartBtn.addEventListener('click', enterGuestMode);
+    if (navBrandLink) {
+        navBrandLink.addEventListener('click', (e) => {
+            if (!currentUser && document.getElementById('speak-page').classList.contains('active')) {
+                e.preventDefault();
+                if (appHeader) appHeader.style.display = 'none';
+                showView('home-page');
+                stopClock();
+            }
+        });
+    }
 
     onAuthStateChanged(auth, (user) => {
         const wasGuest = currentUser === null && user !== null;
         currentUser = user;
-        if (appHeader) appHeader.style.display = 'block';
-        if (landingNav) landingNav.style.display = 'none';
-        startClock();
         if (user) {
+            if (appHeader) appHeader.style.display = 'block';
             updateProfile(user);
             if (wasGuest) migrateLocalToCloud();
             hideGuestCTA();
+            showView('speak-page');
+            startClock();
         } else {
+            if (appHeader) appHeader.style.display = 'none';
             updateProfile(null);
             showGuestCTA();
+            showView('home-page');
+            stopClock();
         }
-        showView('speak-page');
     });
 }
 
